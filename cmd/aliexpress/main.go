@@ -17,7 +17,7 @@ import (
 func main() {
 	logger := log.New(os.Stdout, "[aliexpress] ", log.LstdFlags)
 
-	port := envString("PORT", "8096")
+	port := envString("PORT", "30003")
 	apiKey := envString("ALIEXPRESS_API_KEY", "dev-aliexpress-key")
 	if apiKey == "dev-aliexpress-key" {
 		logger.Println("ALIEXPRESS_API_KEY not set, using default development key")
