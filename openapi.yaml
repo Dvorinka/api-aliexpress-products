@@ -1,0 +1,320 @@
+openapi: 3.0.3
+info:
+  title: AliExpress Products API
+  description: API for scraping product information and searching AliExpress
+  version: 1.0.0
+  contact:
+    name: API Services
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8096
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+paths:
+  /healthz:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the service
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /v1/aliexpress/product:
+    post:
+      summary: Scrape product details
+      description: Extract detailed information from an AliExpress product page
+      tags:
+        - Products
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '200':
+          description: Successful product scraping response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '405':
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/aliexpress/search:
+    post:
+      summary: Search products
+      description: Search for products on AliExpress
+      tags:
+        - Products
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchInput'
+      responses:
+        '200':
+          description: Successful search response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SearchResult'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '405':
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    ProductInput:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: AliExpress product URL
+          example: "https://www.aliexpress.com/item/123456789.html"
+        include_variants:
+          type: boolean
+          description: Whether to include product variants
+          default: false
+          example: true
+
+    SearchInput:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: Search query string
+          example: "wireless headphones"
+        limit:
+          type: integer
+          description: Maximum number of results to return
+          minimum: 1
+          maximum: 50
+          example: 20
+
+    Variant:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Variant name
+          example: "Color: Black, Size: Large"
+        sku:
+          type: string
+          description: Variant SKU
+          example: "BLK-LRG-001"
+        price:
+          type: number
+          format: float
+          description: Variant price
+          example: 29.99
+        available:
+          type: boolean
+          description: Whether variant is available
+          example: true
+
+    Product:
+      type: object
+      properties:
+        url:
+          type: string
+          description: Product URL
+          example: "https://www.aliexpress.com/item/123456789.html"
+        product_id:
+          type: string
+          description: Product ID
+          example: "123456789"
+        title:
+          type: string
+          description: Product title
+          example: "Wireless Bluetooth Headphones"
+        price:
+          type: number
+          format: float
+          description: Current price
+          example: 25.99
+        original_price:
+          type: number
+          format: float
+          description: Original price before discount
+          example: 39.99
+        currency:
+          type: string
+          description: Price currency
+          example: "USD"
+        discount_percent:
+          type: number
+          format: float
+          description: Discount percentage
+          example: 35.0
+        rating:
+          type: number
+          format: float
+          description: Product rating
+          example: 4.5
+        review_count:
+          type: integer
+          description: Number of reviews
+          example: 1250
+        orders:
+          type: integer
+          description: Number of orders
+          example: 5000
+        seller_name:
+          type: string
+          description: Seller name
+          example: "TechStore Official"
+        seller_rating:
+          type: number
+          format: float
+          description: Seller rating
+          example: 4.8
+        shipping:
+          type: string
+          description: Shipping information
+          example: "Free shipping"
+        availability:
+          type: string
+          description: Availability status
+          example: "In stock"
+        image_url:
+          type: string
+          description: Product image URL
+          example: "https://ae01.alicdn.com/kf/123456.jpg"
+        variants:
+          type: array
+          description: Product variants
+          items:
+            $ref: '#/components/schemas/Variant'
+
+    SearchItem:
+      type: object
+      properties:
+        url:
+          type: string
+          description: Product URL
+          example: "https://www.aliexpress.com/item/123456789.html"
+        product_id:
+          type: string
+          description: Product ID
+          example: "123456789"
+        title:
+          type: string
+          description: Product title
+          example: "Wireless Bluetooth Headphones"
+        price:
+          type: number
+          format: float
+          description: Product price
+          example: 25.99
+        currency:
+          type: string
+          description: Price currency
+          example: "USD"
+        rating:
+          type: number
+          format: float
+          description: Product rating
+          example: 4.5
+        seller_name:
+          type: string
+          description: Seller name
+          example: "TechStore Official"
+
+    SearchResult:
+      type: object
+      properties:
+        query:
+          type: string
+          description: Search query that was executed
+          example: "wireless headphones"
+        count:
+          type: integer
+          description: Number of products returned
+          example: 20
+        products:
+          type: array
+          description: List of search results
+          items:
+            $ref: '#/components/schemas/SearchItem'
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "invalid json body"
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: API key for authentication (format: "Bearer YOUR_API_KEY")
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Products
+    description: Product scraping and search functionality
